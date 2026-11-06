@@ -21,7 +21,8 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "themeColor": "#0D1117"
     },
     "backgroundColor": "#0D1117",
     "plugins": [
@@ -32,6 +33,9 @@
     "extra": {
       "supabaseUrl": "https://jrtobjjboerhyelyycfv.supabase.co",
       "supabasePublishableKey": "sb_publishable_rU1Wr3icH07eWWSAtiB_OQ_3kEcGPyx"
+    },
+    "experiments": {
+      "baseUrl": "/App-f-tbolestadisticas"
     }
   }
 }

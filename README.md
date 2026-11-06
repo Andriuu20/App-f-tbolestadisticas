@@ -194,6 +194,13 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 
 ---
 
+## Probar la app
+
+- **Web app (recomendado para el día a día):** https://andriuu20.github.io/App-f-tbolestadisticas/
+  En el iPhone: abrir en Safari → Compartir → «Añadir a pantalla de inicio». Se actualiza sola con cada cambio en `main`
+  (`.github/workflows/publicar-web.yml`).
+- **Expo Go (versión nativa):** en un PC, `cd app && npm install && npx expo start` y escanear el QR con el iPhone.
+
 ## 11. Primeros pasos
 1. Crear el entorno de Claude Code para este repositorio (sección 12) y el proyecto Expo (TypeScript). El repositorio de GitHub ya existe.
    - ✅ Hecho: entorno «App-f-tbolestadisticas» creado y proyecto Expo (SDK 58, TypeScript) en la carpeta `app/`. Para probarlo: `cd app && npx expo start` y escanear el QR con Expo Go.
