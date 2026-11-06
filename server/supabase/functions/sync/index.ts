@@ -12,6 +12,9 @@ Deno.serve(async (req) => {
   if (req.headers.get('x-sync-secret') !== Deno.env.get('SYNC_SECRET')) {
     return new Response('No autorizado', { status: 401 });
   }
+  if (!Deno.env.get('API_FOOTBALL_KEY')) {
+    return Response.json({ error: 'Falta el secreto API_FOOTBALL_KEY' }, { status: 503 });
+  }
   const body = await req.json().catch(() => ({}));
   const api = new ApiFootball({
     sql: sql as unknown as Sql,

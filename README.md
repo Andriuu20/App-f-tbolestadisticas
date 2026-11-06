@@ -200,7 +200,7 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 2. Crear la cuenta gratis de API-Football y probar las consultas (partidos del día, estadísticas, córners, tarjetas, cuotas).
    - ✅ Hecho: cuenta creada y consultas probadas. Resultados y límites del plan gratis en `docs/api-football.md`.
 3. Montar el servidor y la base de datos que descargan y guardan los datos (con caché).
-   - 🟡 En curso: código del servidor (tablas, sincronización y tarea programada) en `server/`, probado en local. Falta crear el proyecto de Supabase y desplegarlo.
+   - ✅ Desplegado en Supabase (proyecto `futbol-stats`, https://jrtobjjboerhyelyycfv.supabase.co): tablas creadas, función `sync` subida y tarea programada cada 30 min. Falta guardar el secreto `API_FOOTBALL_KEY` (Edge Functions → Secrets) cuando API-Football reactive la cuenta.
 4. Calcular las probabilidades (porcentajes históricos + Poisson) para 1X2, goles y ambos marcan.
    - 🟡 En curso: modelo en `server/supabase/functions/_shared/model/` (Poisson + Dixon-Coles, fuerza de equipos, porcentajes históricos y valor frente a la cuota), con pruebas. Falta comprobar con partidos reales si acierta.
 5. Pantallas 1 y 2 (Partidos de hoy y Ficha del partido) con datos reales.
