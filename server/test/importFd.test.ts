@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 import postgres from 'postgres';
 import { londonToUtc, parseFootballData } from '../supabase/functions/_shared/footballData.ts';
-import { computePredictions, importRows } from '../supabase/functions/_shared/importFd.ts';
+import { computePredictions, importRows, updateRecommendations } from '../supabase/functions/_shared/importFd.ts';
 import type { Sql } from '../supabase/functions/_shared/types.ts';
 
 const sql = postgres(process.env.TEST_DATABASE_URL!, { max: 1, onnotice: () => {} });
@@ -65,4 +65,18 @@ test('importa sin duplicar y calcula predicciones de los próximos partidos', as
   assert.equal(Number(card.corners_avg), 10);
   const [pred] = await sql`select home_recent from predictions`;
   assert.equal(pred.home_recent.form.length, 5);
+
+  // Recomendaciones: con cuota local 1,60 hay "segura"; cuando se juega, se comprueba y ya no cambia.
+  const recs = await updateRecommendations(db, new Date('2026-11-06T12:00:00Z'));
+  assert.ok(recs.saved >= 2);
+  const [segura] = await sql`select label, odd, won from recommendations where tier = 'segura'`;
+  assert.equal(segura.label, 'Gana Betis');
+  assert.equal(segura.won, null);
+  await importRows(db, parseFootballData(csv('SP1,08/11/2026,16:15,Betis,Sevilla,2,0,H,1,0,H,,10,8,4,3,6,4,2,2,0,0,1.6,3.8,5.5,1.9,1.9')));
+  const after = await updateRecommendations(db, new Date('2026-11-09T12:00:00Z'));
+  assert.ok(after.settled >= 2);
+  const [done] = await sql`select won, odd from recommendations where tier = 'segura'`;
+  assert.equal(done.won, true);
+  assert.equal(Number(done.odd), 1.6);
 });
+

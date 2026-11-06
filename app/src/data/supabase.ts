@@ -127,3 +127,43 @@ export async function getStats(fixtureIds: number[]) {
     `fixture_stats?select=fixture_id,team_id,corners,yellow_cards&fixture_id=in.(${fixtureIds.join(',')})`,
   );
 }
+
+export type Tier = 'segura' | 'media' | 'arriesgada';
+export interface Recommendation {
+  fixture_id: number;
+  tier: Tier;
+  market: string;
+  selection: string;
+  label: string;
+  odd: number;
+  prob: number;
+  model_prob: number;
+  reason: string;
+  won: boolean | null;
+  kickoff: string;
+  status: string;
+  league_id: number;
+  league_name: string;
+  home_name: string;
+  away_name: string;
+  home_goals: number | null;
+  away_goals: number | null;
+}
+const normRec = (r: Recommendation): Recommendation => ({ ...r, odd: Number(r.odd), prob: Number(r.prob), model_prob: Number(r.model_prob) });
+
+export async function getRecommendations(fixtureId: number): Promise<Recommendation[]> {
+  return (await get<Recommendation[]>(`recommendation_cards?select=*&fixture_id=eq.${fixtureId}`)).map(normRec);
+}
+
+/** Recomendaciones de partidos que aún no han empezado, de un nivel. */
+export async function getUpcomingRecommendations(tier: Tier): Promise<Recommendation[]> {
+  const now = encodeURIComponent(new Date().toISOString());
+  return (await get<Recommendation[]>(
+    `recommendation_cards?select=*&tier=eq.${tier}&kickoff=gt.${now}&order=kickoff&limit=60`,
+  )).map(normRec);
+}
+
+/** Recomendaciones ya comprobadas (ganadas o perdidas), las más recientes primero. */
+export async function getSettledRecommendations(): Promise<Recommendation[]> {
+  return (await get<Recommendation[]>(`recommendation_cards?select=*&won=not.is.null&order=kickoff.desc&limit=500`)).map(normRec);
+}

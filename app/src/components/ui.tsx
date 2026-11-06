@@ -79,7 +79,7 @@ export const ModelWarning = () => (
   <View style={s.warning}>
     <T style={{ fontSize: 12, color: colors.risky, fontFamily: fonts.semibold }}>Modelo en pruebas</T>
     <T style={{ fontSize: 12, color: colors.textSecondary }}>
-      Las probabilidades son estimaciones y todavía aciertan menos que las casas de apuestas. No apuestes dinero con ellas.
+      Las probabilidades son estimaciones, no garantías. El modelo todavía acierta menos que las casas de apuestas.
     </T>
   </View>
 );

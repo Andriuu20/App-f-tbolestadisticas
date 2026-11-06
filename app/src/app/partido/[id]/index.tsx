@@ -1,13 +1,13 @@
 // Pantalla 2: ficha del partido.
-import { router, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { ErrorBox, Loading, Screen } from '../../components/Screen';
-import { Card, Chips, Form, Label, ModelWarning, PctBar, s, T } from '../../components/ui';
-import { getHeadToHead, getMatch, getStats, type MatchCard, type Odd, type Prediction } from '../../data/supabase';
-import { dec, initials, pct, time } from '../../logic/format';
-import { expectedValue, fairProbabilities, leagueShort } from '../../logic/value';
-import { colors, fonts } from '../../theme/colors';
+import { ErrorBox, Loading, Screen } from '../../../components/Screen';
+import { Card, Chips, Form, Label, ModelWarning, PctBar, s, T } from '../../../components/ui';
+import { getHeadToHead, getMatch, getStats, type MatchCard, type Odd, type Prediction } from '../../../data/supabase';
+import { dec, initials, pct, time } from '../../../logic/format';
+import { expectedValue, fairProbabilities, leagueShort } from '../../../logic/value';
+import { colors, fonts } from '../../../theme/colors';
 
 type Tab = 'Resumen' | 'Goles' | 'Córners' | 'Tarjetas' | 'H2H';
 const TABS: Tab[] = ['Resumen', 'Goles', 'Córners', 'Tarjetas', 'H2H'];
@@ -139,10 +139,11 @@ function Summary({ card, p, odds }: { card: MatchCard; p: Prediction; odds: Odd[
           <T style={{ fontSize: 12, color: colors.textSecondary }}>amarillas por partido</T>
         </Card>
       </View>
-      <View style={{ height: 52, borderRadius: 14, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
-        alignItems: 'center', justifyContent: 'center' }}>
-        <T style={{ color: colors.textSecondary, fontFamily: fonts.semibold }}>3 apuestas recomendadas · próximamente</T>
-      </View>
+      <Link href={{ pathname: '/partido/[id]/apuestas', params: { id: String(card.id) } }} asChild>
+        <Pressable style={{ height: 52, borderRadius: 14, backgroundColor: colors.safe, alignItems: 'center', justifyContent: 'center' }}>
+          <T style={{ color: colors.background, fontFamily: fonts.bold, fontSize: 15 }}>Ver 3 apuestas recomendadas</T>
+        </Pressable>
+      </Link>
     </>
   );
 }

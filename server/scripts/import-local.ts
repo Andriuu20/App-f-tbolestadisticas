@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import postgres from 'postgres';
 import { parseFootballData } from '../supabase/functions/_shared/footballData.ts';
-import { computePredictions, importRows } from '../supabase/functions/_shared/importFd.ts';
+import { computePredictions, importRows, updateRecommendations } from '../supabase/functions/_shared/importFd.ts';
 import type { Sql } from '../supabase/functions/_shared/types.ts';
 
 const [dir, now] = process.argv.slice(2);
@@ -17,4 +17,5 @@ for (const f of files) {
   console.log(f, r);
 }
 console.log('predicciones:', await computePredictions(sql, now ? new Date(now) : new Date()));
+console.log('recomendaciones:', await updateRecommendations(sql, now ? new Date(now) : new Date()));
 await sql.end();

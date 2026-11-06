@@ -3,7 +3,7 @@
 // {"action": "history", "seasons": ["2425", "2526"]} -> temporadas pasadas (una vez).
 import postgres from 'npm:postgres@3.4.5';
 import { parseFootballData } from '../_shared/footballData.ts';
-import { computePredictions, importRows, type ImportReport } from '../_shared/importFd.ts';
+import { computePredictions, importRows, updateRecommendations, type ImportReport } from '../_shared/importFd.ts';
 import type { Sql } from '../_shared/types.ts';
 
 const sql = postgres(Deno.env.get('SUPABASE_DB_URL')!, { prepare: false, max: 1 }) as unknown as Sql;
@@ -39,7 +39,8 @@ Deno.serve(async (req) => {
       files['fixtures'] = await importRows(sql, parseFootballData(await download('/fixtures.csv')));
     }
     const predictions = await computePredictions(sql);
-    return Response.json({ files, predictions });
+    const recommendations = await updateRecommendations(sql);
+    return Response.json({ files, predictions, recommendations });
   } catch (e) {
     return Response.json({ error: String(e), files }, { status: 500 });
   }

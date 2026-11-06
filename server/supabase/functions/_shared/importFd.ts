@@ -1,5 +1,6 @@
 // Importa football-data.co.uk a la base de datos y calcula las predicciones de los próximos partidos.
 import type { FdRow } from './footballData.ts';
+import { recommend, settle } from './recommend.ts';
 import { historicalRates, predictGoals, type PastMatch } from './model/index.ts';
 import type { Sql } from './types.ts';
 
@@ -183,4 +184,54 @@ export async function computePredictions(sql: Sql, now = new Date(), days = 8): 
     saved++;
   }
   return saved;
+}
+
+/**
+ * Recalcula las recomendaciones de los partidos que aún no han empezado (las cuotas cambian) y
+ * comprueba las de los partidos terminados. Una vez empezado el partido, la recomendación ya no cambia.
+ */
+export async function updateRecommendations(sql: Sql, now = new Date()): Promise<{ saved: number; settled: number }> {
+  const upcoming = await sql`
+    select f.id, h.name as home_name, a.name as away_name, p.p_home, p.p_draw, p.p_away, p.p_over25,
+      p.home_recent, p.away_recent
+    from fixtures f join predictions p on p.fixture_id = f.id
+    join teams h on h.id = f.home_id join teams a on a.id = f.away_id
+    where f.status = 'NS' and f.kickoff > ${now}`;
+  let saved = 0;
+  for (const u of upcoming) {
+    const odds = (await sql`select bookmaker, market, selection, odd from odds where fixture_id = ${u.id}`)
+      .map((o) => ({ ...o, odd: Number(o.odd) })) as { bookmaker: string; market: string; selection: string; odd: number }[];
+    const recs = recommend(odds, {
+      homeName: u.home_name, awayName: u.away_name,
+      model: { home: Number(u.p_home), draw: Number(u.p_draw), away: Number(u.p_away), over25: Number(u.p_over25) },
+      homeRecent: u.home_recent, awayRecent: u.away_recent,
+    });
+    const tiers = recs.map((r) => r.tier);
+    await sql`delete from recommendations where fixture_id = ${u.id} and won is null
+      and not (tier = any(${tiers}::text[]))`;
+    for (const r of recs) {
+      await sql`
+        insert into recommendations (fixture_id, tier, market, selection, label, odd, prob, model_prob, reason, model, updated_at)
+        values (${u.id}, ${r.tier}, ${r.market}, ${r.selection}, ${r.label}, ${r.odd}, ${r.prob.toFixed(4)},
+          ${r.modelProb.toFixed(4)}, ${r.reason}, ${MODEL_VERSION}, now())
+        on conflict (fixture_id, tier) do update set
+          market = excluded.market, selection = excluded.selection, label = excluded.label, odd = excluded.odd,
+          prob = excluded.prob, model_prob = excluded.model_prob, reason = excluded.reason,
+          model = excluded.model, updated_at = now()`;
+      saved++;
+    }
+  }
+  const pending = await sql`
+    select r.fixture_id, r.tier, r.market, r.selection, f.home_goals, f.away_goals
+    from recommendations r join fixtures f on f.id = r.fixture_id
+    where r.won is null and f.status in ('FT', 'AET', 'PEN') and f.home_goals is not null`;
+  let settled = 0;
+  for (const p of pending) {
+    const won = settle(p.market, p.selection, p.home_goals, p.away_goals);
+    if (won === null) continue;
+    await sql`update recommendations set won = ${won}, settled_at = now()
+      where fixture_id = ${p.fixture_id} and tier = ${p.tier}`;
+    settled++;
+  }
+  return { saved, settled };
 }
