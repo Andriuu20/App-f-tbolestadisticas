@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Rankings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0D1117; color: #E6EDF3; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 56px 20px 12px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 13px; color: #9AA4AF">LaLiga · temporada actual</span>
+      <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px">Rankings</h1>
+    </div>
+    <div style="display: flex; gap: 8px; overflow-x: auto">
+      <sc-for list="{{markets}}" as="mk" hint-placeholder-count="5">
+        <button style="{{mk.style}}" onClick="{{mk.pick}}">{{mk.name}}</button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="flex: 1; overflow-y: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; justify-content: space-between; padding: 4px 4px 2px; font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #9AA4AF">
+      <span>{{title}}</span>
+      <span>% PARTIDOS</span>
+    </div>
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+      <div style="background: #161B22; border: 1px solid #262D36; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #9AA4AF; width: 20px">{{r.pos}}</span>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; justify-content: space-between">
+            <span style="font-size: 14px; font-weight: 600">{{r.team}}</span>
+            <span style="font-size: 12px; color: #9AA4AF">{{r.games}}</span>
+          </div>
+          <div style="height: 6px; border-radius: 3px; background: #262D36; overflow: hidden"><div style="{{r.bar}}"></div></div>
+        </div>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; width: 44px; text-align: right">{{r.pct}}</span>
+      </div>
+    </sc-for>
+  </div>
+  <nav style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #262D36; background: #0D1117; padding: 8px 8px 28px">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #9AA4AF; font-size: 11px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7l4 3-1.5 5h-5L8 10z"></path></svg>
+      Partidos
+    </a>
+    <a href="Rankings.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #A3E635; font-size: 11px; font-weight: 600">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>
+      Rankings
+    </a>
+    <a href="Recomendaciones.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #9AA4AF; font-size: 11px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"></path></svg>
+      Para ti
+    </a>
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #9AA4AF; font-size: 11px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+      Historial
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { market: 'Más de 2,5' }; }
+  renderVals() {
+    var self = this;
+    var chip = 'height: 36px; padding: 0 14px; border-radius: 18px; font-family: Inter, sans-serif; font-size: 13px; font-weight: 600; white-space: nowrap; ';
+    var data = {
+      'Más de 2,5': [['Barcelona', 82], ['Real Madrid', 73], ['Girona', 64], ['Betis', 55], ['Villarreal', 55], ['Athletic', 45], ['Sevilla', 45], ['Atlético', 36]],
+      'Ambos marcan': [['Girona', 73], ['Betis', 64], ['Villarreal', 64], ['Sevilla', 55], ['Barcelona', 55], ['Athletic', 45], ['Real Madrid', 45], ['Atlético', 36]],
+      'Córners +9,5': [['Real Madrid', 64], ['Barcelona', 64], ['Athletic', 55], ['Villarreal', 55], ['Betis', 45], ['Girona', 45], ['Sevilla', 36], ['Atlético', 36]],
+      'Tarjetas +4,5': [['Sevilla', 64], ['Atlético', 55], ['Betis', 55], ['Athletic', 45], ['Girona', 36], ['Villarreal', 36], ['Real Madrid', 27], ['Barcelona', 27]]
+    };
+    var markets = Object.keys(data).map(function (n) {
+      var on = self.state.market === n;
+      return { name: n, style: chip + (on ? 'background: #A3E635; color: #0D1117; border: 1px solid #A3E635;' : 'background: #161B22; color: #E6EDF3; border: 1px solid #262D36;'), pick: function () { self.setState({ market: n }); } };
+    });
+    var rows = data[this.state.market].map(function (r, i) {
+      return { pos: String(i + 1), team: r[0], pct: r[1] + '%', games: Math.round(r[1] * 11 / 100) + ' de 11', bar: 'height: 6px; border-radius: 3px; width: ' + r[1] + '%; background: ' + (r[1] >= 60 ? '#A3E635' : '#58A6FF') + ';' };
+    });
+    return { markets: markets, rows: rows, title: this.state.market.toUpperCase() };
+  }
+}
+</script>
+</body>
+</html>

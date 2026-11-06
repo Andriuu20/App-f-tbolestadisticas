@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ficha del partido</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0D1117; color: #E6EDF3; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="padding: 52px 16px 0; display: flex; align-items: center; gap: 8px">
+    <a href="Main.dc.html" aria-label="Volver" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: #161B22; border: 1px solid #262D36">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <span style="flex: 1; text-align: center; font-size: 13px; color: #9AA4AF">LaLiga · Jornada 12 · 18:30</span>
+    <button aria-label="Guardar partido" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: #161B22; border: 1px solid #262D36; color: #E6EDF3">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>
+    </button>
+  </div>
+  <div style="padding: 16px 20px 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="width: 52px; height: 52px; border-radius: 26px; background: #E6EDF3; color: #0D1117; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">RMA</div>
+      <span style="font-size: 14px; font-weight: 600">Real Madrid</span>
+      <div style="display: flex; gap: 3px">
+        <sc-for list="{{homeForm}}" as="f" hint-placeholder-count="5"><span style="{{f.style}}">{{f.r}}</span></sc-for>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600">VS</span>
+      <span style="font-size: 12px; color: #9AA4AF">Goles esperados</span>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #A3E635">1,9 – 1,0</span>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="width: 52px; height: 52px; border-radius: 26px; background: #262D36; color: #E6EDF3; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">SEV</div>
+      <span style="font-size: 14px; font-weight: 600">Sevilla</span>
+      <div style="display: flex; gap: 3px">
+        <sc-for list="{{awayForm}}" as="f" hint-placeholder-count="5"><span style="{{f.style}}">{{f.r}}</span></sc-for>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 6px; padding: 4px 16px 12px; border-bottom: 1px solid #262D36">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <button style="{{t.style}}" onClick="{{t.pick}}">{{t.name}}</button>
+    </sc-for>
+  </div>
+  <div style="flex: 1; overflow-y: auto; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="background: #161B22; border: 1px solid #262D36; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #9AA4AF">RESULTADO 1X2</span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="background: #0D1117; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 12px; color: #9AA4AF">Local</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; color: #A3E635">61%</span></div>
+        <div style="background: #0D1117; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 12px; color: #9AA4AF">Empate</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600">22%</span></div>
+        <div style="background: #0D1117; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 12px; color: #9AA4AF">Visitante</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600">17%</span></div>
+      </div>
+    </div>
+    <div style="background: #161B22; border: 1px solid #262D36; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #9AA4AF">GOLES</span>
+      <sc-for list="{{goals}}" as="g" hint-placeholder-count="5">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; justify-content: space-between; font-size: 14px">
+            <span>{{g.label}}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600">{{g.pct}}</span>
+          </div>
+          <div style="height: 8px; border-radius: 4px; background: #262D36; overflow: hidden">
+            <div style="{{g.bar}}"></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <div style="background: #161B22; border: 1px solid #262D36; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #9AA4AF">CÓRNERS</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600">10,2</span>
+        <span style="font-size: 12px; color: #9AA4AF">media por partido</span>
+        <span style="font-size: 13px; margin-top: 6px">+8,5 · <b style="color: #A3E635">71%</b></span>
+      </div>
+      <div style="background: #161B22; border: 1px solid #262D36; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #9AA4AF">TARJETAS</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600">4,6</span>
+        <span style="font-size: 12px; color: #9AA4AF">árbitro: 5,1 / partido</span>
+        <span style="font-size: 13px; margin-top: 6px">+3,5 · <b style="color: #A3E635">68%</b></span>
+      </div>
+    </div>
+    <a href="Recomendaciones.dc.html" style="height: 52px; border-radius: 14px; background: #A3E635; color: #0D1117; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700">
+      Ver 3 apuestas recomendadas
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'Resumen' }; }
+  renderVals() {
+    var self = this;
+    var tabStyle = 'height: 36px; padding: 0 12px; border-radius: 18px; font-family: Inter, sans-serif; font-size: 13px; font-weight: 600; ';
+    var tabs = ['Resumen', 'Goles', 'Córners', 'Tarjetas', 'H2H'].map(function (n) {
+      var on = self.state.tab === n;
+      return { name: n, style: tabStyle + (on ? 'background: #E6EDF3; color: #0D1117; border: 1px solid #E6EDF3;' : 'background: transparent; color: #9AA4AF; border: 1px solid #262D36;'), pick: function () { self.setState({ tab: n }); } };
+    });
+    var formColors = { V: '#A3E635', E: '#9AA4AF', D: '#F0883E' };
+    function form(list) {
+      return list.map(function (r) {
+        return { r: r, style: 'width: 18px; height: 18px; border-radius: 4px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; color: #0D1117; background: ' + formColors[r] + ';' };
+      });
+    }
+    var goals = [['Más de 0,5', 93], ['Más de 1,5', 78], ['Más de 2,5', 64], ['Más de 3,5', 32], ['Ambos marcan', 52]].map(function (g) {
+      return { label: g[0], pct: g[1] + '%', bar: 'height: 8px; border-radius: 4px; width: ' + g[1] + '%; background: ' + (g[1] >= 60 ? '#A3E635' : '#58A6FF') + ';' };
+    });
+    return { tabs: tabs, homeForm: form(['V', 'V', 'E', 'V', 'D']), awayForm: form(['D', 'E', 'V', 'D', 'D']), goals: goals };
+  }
+}
+</script>
+</body>
+</html>
