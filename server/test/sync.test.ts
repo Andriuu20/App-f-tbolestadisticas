@@ -2,7 +2,7 @@
 // No llaman a la API. Necesitan una base de datos PostgreSQL vacía de pruebas:
 //   TEST_DATABASE_URL=postgres://postgres:postgres@localhost/futbol_test npm test
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 import postgres from 'postgres';
 import { ApiFootball } from '../supabase/functions/_shared/apiFootball.ts';
@@ -12,7 +12,8 @@ import type { Fetch, Sql } from '../supabase/functions/_shared/types.ts';
 const url = process.env.TEST_DATABASE_URL;
 if (!url) throw new Error('Falta TEST_DATABASE_URL');
 const sql = postgres(url, { max: 1, onnotice: () => {} });
-const schema = readFileSync(new URL('../supabase/migrations/20261106000000_init.sql', import.meta.url), 'utf8');
+const migrationsDir = new URL('../supabase/migrations/', import.meta.url);
+const schema = readdirSync(migrationsDir).sort().map((f) => readFileSync(new URL(f, migrationsDir), 'utf8')).join('\n');
 const data = (name: string) => JSON.parse(readFileSync(new URL(`./data/${name}.json`, import.meta.url), 'utf8'));
 const empty = { errors: [], results: 0, response: [] };
 const NOW = new Date('2026-11-06T12:00:00Z');
@@ -30,7 +31,7 @@ function fakeApi(overrides: Record<string, unknown> = {}) {
       if (key === '/odds?fixture=1570450') body = data('odds-1570450');
       if (key === '/fixtures/statistics?fixture=1492444') body = data('statistics-1492444');
     }
-    return { status: 200, json: async () => body };
+    return { status: 200, json: async () => body, text: async () => JSON.stringify(body) };
   };
   return { fetch, calls };
 }

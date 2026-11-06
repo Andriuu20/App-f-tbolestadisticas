@@ -19,8 +19,19 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
     },
-    "backgroundColor": "#0D1117"
+    "backgroundColor": "#0D1117",
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "scheme": "futbolstats",
+    "extra": {
+      "supabaseUrl": "https://jrtobjjboerhyelyycfv.supabase.co",
+      "supabasePublishableKey": "sb_publishable_rU1Wr3icH07eWWSAtiB_OQ_3kEcGPyx"
+    }
   }
 }
