@@ -3,7 +3,7 @@ import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { ErrorBox, Loading, Screen } from '../../../components/Screen';
-import { Card, Chips, Form, Label, ModelWarning, PctBar, s, T } from '../../../components/ui';
+import { Card, Chips, Form, Label, ModelWarning, OverUnder, PctBar, s, T } from '../../../components/ui';
 import { getHeadToHead, getMatch, getStats, type MatchCard, type Odd, type Prediction } from '../../../data/supabase';
 import { dec, initials, pct, time } from '../../../logic/format';
 import { expectedValue, fairProbabilities, leagueShort } from '../../../logic/value';
@@ -123,8 +123,7 @@ function Summary({ card, p, odds }: { card: MatchCard; p: Prediction; odds: Odd[
         </T>
       </Card>
       <Card>
-        <Label>GOLES</Label>
-        {[0.5, 1.5, 2.5, 3.5].map((l) => <PctBar key={l} label={`Más de ${String(l).replace('.', ',')}`} p={m.over[l]} />)}
+        <OverUnder title="GOLES" unit="goles" over={{ '0.5': m.over[0.5], '1.5': m.over[1.5], '2.5': m.over[2.5], '3.5': m.over[3.5] }} />
         <PctBar label="Ambos marcan" p={m.btts} />
       </Card>
       <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -154,9 +153,9 @@ function Goals({ card, p }: { card: MatchCard; p: Prediction }) {
   return (
     <>
       <Card>
-        <Label>TOTAL DE GOLES (MODELO)</Label>
-        {[0.5, 1.5, 2.5, 3.5, 4.5].map((l) => <PctBar key={l} label={`Más de ${String(l).replace('.', ',')}`} p={m.over[l]} />)}
+        <OverUnder title="TOTAL DE GOLES (MODELO)" unit="goles" over={{ '0.5': m.over[0.5], '1.5': m.over[1.5], '2.5': m.over[2.5], '3.5': m.over[3.5], '4.5': m.over[4.5] }} />
         <PctBar label="Ambos marcan" p={m.btts} />
+        <PctBar label="No marcan los dos" p={1 - m.btts} />
       </Card>
       <Card>
         <Label>GOLES DE CADA EQUIPO (MODELO)</Label>
@@ -227,9 +226,7 @@ function Averages({ p, card, kind }: { p: Prediction; card: MatchCard; kind: 'co
               </View>
             ))}
           </View>
-          {Object.entries(model.over).sort(([a], [b]) => Number(a) - Number(b)).map(([line, prob]) => (
-            <PctBar key={line} label={`Más de ${line.replace('.', ',')} ${word}`} p={prob} />
-          ))}
+          <OverUnder title="PROBABILIDAD" unit={word} over={model.over} />
         </Card>
       ) : null}
       <Card>

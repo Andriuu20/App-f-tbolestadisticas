@@ -1,5 +1,5 @@
 // Piezas visuales reutilizables con el estilo del boceto.
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
 import { colors, fonts } from '../theme/colors';
 
@@ -93,3 +93,38 @@ export const s = StyleSheet.create({
   warning: { borderColor: colors.risky, borderWidth: 1, borderRadius: 12, padding: 10, gap: 2, backgroundColor: '#1F1610' },
   tile: { flex: 1, backgroundColor: colors.background, borderRadius: 10, padding: 8, gap: 2 },
 });
+
+/**
+ * Barras de "más de X" / "menos de X" con un selector para cambiar entre las dos.
+ * `over` = probabilidad de "más de" por línea; "menos de" es 1 - eso.
+ */
+export function OverUnder({ title, over, unit, highAt = 0.6 }: {
+  title: string; over: Record<string, number>; unit: string; highAt?: number;
+}) {
+  const [mode, setMode] = useState<'over' | 'under'>('over');
+  const lines = Object.keys(over).sort((a, b) => Number(a) - Number(b));
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Label>{title}</Label>
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          {(['over', 'under'] as const).map((m) => (
+            <Pressable key={m} onPress={() => setMode(m)} style={{
+              paddingHorizontal: 10, height: 28, borderRadius: 14, justifyContent: 'center', borderWidth: 1,
+              borderColor: mode === m ? colors.text : colors.border, backgroundColor: mode === m ? colors.text : 'transparent',
+            }}>
+              <T style={{ fontSize: 12, fontFamily: fonts.semibold, color: mode === m ? colors.background : colors.textSecondary }}>
+                {m === 'over' ? 'Más de' : 'Menos de'}
+              </T>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+      {lines.map((l) => (
+        <PctBar key={l} highAt={highAt}
+          label={`${mode === 'over' ? 'Más' : 'Menos'} de ${l.replace('.', ',')} ${unit}`}
+          p={mode === 'over' ? over[l] : 1 - over[l]} />
+      ))}
+    </View>
+  );
+}
