@@ -196,6 +196,7 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 
 ## 11. Primeros pasos
 1. Crear el entorno de Claude Code para este repositorio (sección 12) y el proyecto Expo (TypeScript). El repositorio de GitHub ya existe.
+   - ✅ Hecho: entorno «App-f-tbolestadisticas» creado y proyecto Expo (SDK 58, TypeScript) en la carpeta `app/`. Para probarlo: `cd app && npx expo start` y escanear el QR con Expo Go.
 2. Crear la cuenta gratis de API-Football y probar las consultas (partidos del día, estadísticas, córners, tarjetas, cuotas).
 3. Montar el servidor y la base de datos que descargan y guardan los datos (con caché).
 4. Calcular las probabilidades (porcentajes históricos + Poisson) para 1X2, goles y ambos marcan.
