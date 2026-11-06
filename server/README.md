@@ -29,3 +29,10 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost/futbol_test npm test
 - `API_FOOTBALL_KEY`: clave de API-Football.
 - `SYNC_SECRET`: una contraseña larga inventada; la misma que se guarda en Vault como `sync_secret`.
 - `API_DAILY_BUDGET` (opcional).
+
+## Backtest del modelo
+Predice cada partido pasado de LaLiga y Premier usando solo los anteriores y lo compara con el
+resultado real y con las cuotas de Bet365 (datos gratis de football-data.co.uk):
+```
+npm run backtest
+```

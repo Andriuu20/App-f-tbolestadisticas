@@ -5,7 +5,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "sync:local": "node scripts/sync-local.ts",
-    "test": "node --test --test-concurrency=1 test/*.test.ts"
+    "test": "node --test --test-concurrency=1 test/*.test.ts",
+    "backtest": "bash scripts/download-football-data.sh data/football-data && node scripts/backtest.ts data/football-data"
   },
   "dependencies": {
     "postgres": "3.4.5"
