@@ -202,6 +202,7 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 3. Montar el servidor y la base de datos que descargan y guardan los datos (con caché).
    - 🟡 En curso: código del servidor (tablas, sincronización y tarea programada) en `server/`, probado en local. Falta crear el proyecto de Supabase y desplegarlo.
 4. Calcular las probabilidades (porcentajes históricos + Poisson) para 1X2, goles y ambos marcan.
+   - 🟡 En curso: modelo en `server/supabase/functions/_shared/model/` (Poisson + Dixon-Coles, fuerza de equipos, porcentajes históricos y valor frente a la cuota), con pruebas. Falta comprobar con partidos reales si acierta.
 5. Pantallas 1 y 2 (Partidos de hoy y Ficha del partido) con datos reales.
 6. Pantalla de rankings.
 7. Las 3 recomendaciones y el historial con resultados reales.
