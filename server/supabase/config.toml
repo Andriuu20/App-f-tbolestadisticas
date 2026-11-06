@@ -1,0 +1,5 @@
+project_id = "futbol-stats"
+
+# La función usa su propia clave (cabecera x-sync-secret) en vez del inicio de sesión de Supabase.
+[functions.sync]
+verify_jwt = false
