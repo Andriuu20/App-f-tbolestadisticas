@@ -42,6 +42,7 @@ export function readFootballData(files: string[]): FdMatch[] {
         league: r.Div, home: r.HomeTeam, away: r.AwayTeam,
         date: `${year}-${m}-${d}T${r.Time || '15:00'}:00Z`,
         homeId: id(r.HomeTeam), awayId: id(r.AwayTeam), homeGoals: hg, awayGoals: ag,
+        homeShotsOnTarget: num(r.HST) ?? null, awayShotsOnTarget: num(r.AST) ?? null,
         odds: {
           home: num(r.B365H), draw: num(r.B365D), away: num(r.B365A),
           over25: num(r['B365>2.5']), under25: num(r['B365<2.5']),

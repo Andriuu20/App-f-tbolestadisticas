@@ -1,0 +1,48 @@
+== Ajuste del modelo v2 (2021-22 y 2022-23) ==
+  Elegido: {
+  version: 'v2',
+  halfLifeDays: 365,
+  priorMatches: 5,
+  promotedStrength: 0.8,
+  goalsWeight: 0.5,
+  rho: -0.1
+} (491 s)
+  Mezcla con Bet365: 0 % modelo, 100 % Bet365
+
+== Prueba (2023-24 a 2026-27, 5 ligas): 5708 partidos con cuotas ==
+Pérdida logarítmica (más baja = mejor; azar: 1X2 = 1,0986, +2,5 = 0,6931)
+  Modelo v1      1X2 0.9999   +2,5 0.6794
+  Modelo v2      1X2 0.9863   +2,5 0.6742
+  Mezcla 0/100   1X2 0.9654   +2,5 0.6680
+  Bet365         1X2 0.9654   +2,5 0.6680
+
+Calibración v2 — gana el local   (modelo dice → pasó de verdad, nº partidos)
+  17→11 % (263)  25→21 % (877)  35→34 % (1386)  45→45 % (1426)  55→60 % (1003)  64→69 % (512)  74→87 % (187)  83→80 % (40)
+
+Calibración v2 — más de 2,5   (modelo dice → pasó de verdad, nº partidos)
+  37→39 % (507)  46→48 % (1787)  55→56 % (2066)  64→64 % (1142)  73→75 % (176)
+
+Calibración v2 — ambos marcan   (modelo dice → pasó de verdad, nº partidos)
+  39→45 % (58)  46→49 % (1455)  55→54 % (2870)  63→63 % (1293)  71→72 % (32)
+
+Recién ascendido jugando en casa (818 partidos), modelo v1: dice que gana 36 %, ganó 29 %
+
+Recién ascendido jugando en casa (818 partidos), modelo v2: dice que gana 30 %, ganó 29 %
+
+Simulación MODELO v2 (1 € por apuesta, cuotas de Bet365, 1X2 y más/menos 2,5)
+  Todas (referencia)                     28540 apuestas · esperaba 40 % · acertó 40.0 % · beneficio -6.8 %
+  Con valor > 5 %                         6779 apuestas · esperaba 33 % · acertó 25.0 % · beneficio -16.3 %
+  Segura: cuota 1,30-1,60, valor > 0 %     237 apuestas · esperaba 68 % · acertó 58.2 % · beneficio -12.1 %
+  Segura: cuota 1,30-1,60, valor > 3 %      93 apuestas · esperaba 70 % · acertó 62.4 % · beneficio -5.7 %
+  Media: cuota 1,80-2,50, valor > 3 %     1873 apuestas · esperaba 52 % · acertó 42.9 % · beneficio -9.9 %
+  Arriesgada: cuota 4-10, valor > 5 %     3160 apuestas · esperaba 23 % · acertó 15.4 % · beneficio -19.0 %
+
+Simulación MEZCLA 0/100 (1 € por apuesta, cuotas de Bet365, 1X2 y más/menos 2,5)
+  Todas (referencia)                     28540 apuestas · esperaba 40 % · acertó 40.0 % · beneficio -6.8 %
+  Con valor > 5 %: ninguna
+  Segura: cuota 1,30-1,60, valor > 0 %: ninguna
+  Segura: cuota 1,30-1,60, valor > 3 %: ninguna
+  Media: cuota 1,80-2,50, valor > 3 %: ninguna
+  Arriesgada: cuota 4-10, valor > 5 %: ninguna
+
+Tiempo total: 543 s

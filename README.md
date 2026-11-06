@@ -202,7 +202,7 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 3. Montar el servidor y la base de datos que descargan y guardan los datos (con caché).
    - ✅ Desplegado en Supabase (proyecto `futbol-stats`, https://jrtobjjboerhyelyycfv.supabase.co): tablas creadas, función `sync` subida y tarea programada cada 30 min. Falta guardar el secreto `API_FOOTBALL_KEY` (Edge Functions → Secrets) cuando API-Football reactive la cuenta.
 4. Calcular las probabilidades (porcentajes históricos + Poisson) para 1X2, goles y ambos marcan.
-   - 🟡 Modelo v1 en `server/supabase/functions/_shared/model/`, con pruebas y backtest (`npm run backtest` en `server/`). Acierta más que el azar pero menos que Bet365. Pendiente: equipos recién ascendidos, usar todos los partidos de cada equipo, tiros a puerta y córners/tarjetas.
+   - 🟡 Modelo v2 en uso (`server/supabase/functions/_shared/model/`), con pruebas y backtest. Bien calibrado, pero no supera a Bet365 en 1X2 ni en goles: resultados en `docs/modelo.md`. Pendiente: córners y tarjetas.
 5. Pantallas 1 y 2 (Partidos de hoy y Ficha del partido) con datos reales.
    - ✅ Hechas con datos reales de football-data.co.uk (5 ligas, próximos partidos con cuotas de Bet365) a través de Supabase; el servidor recalcula las predicciones cada 6 horas. Aviso visible de «modelo en pruebas».
 6. Pantalla de rankings.

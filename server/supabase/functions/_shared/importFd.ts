@@ -3,9 +3,11 @@ import type { FdRow } from './footballData.ts';
 import { historicalRates, predictGoals, type PastMatch } from './model/index.ts';
 import type { Sql } from './types.ts';
 
-export const MODEL_VERSION = 'goles-v1';
+export const MODEL_VERSION = 'goles-v2';
 /** Ajustes elegidos con el backtest (scripts/backtest.ts). */
-export const MODEL_OPTIONS = { halfLifeDays: 365, priorMatches: 8, rho: 0 };
+export const MODEL_OPTIONS = {
+  version: 'v2' as const, halfLifeDays: 365, priorMatches: 5, promotedStrength: 0.8, goalsWeight: 0.5, rho: -0.1,
+};
 
 const key = (r: FdRow) => `fd:${r.league}:${r.date}:${r.home}:${r.away}`;
 
@@ -120,12 +122,15 @@ export async function computePredictions(sql: Sql, now = new Date(), days = 8): 
     const past = await sql`
       select f.id, f.kickoff, f.home_id, f.away_id, f.home_goals, f.away_goals,
         (select sum(s.corners) from fixture_stats s where s.fixture_id = f.id) as corners,
-        (select sum(s.yellow_cards) from fixture_stats s where s.fixture_id = f.id) as yellows
+        (select sum(s.yellow_cards) from fixture_stats s where s.fixture_id = f.id) as yellows,
+        (select s.shots_on_target from fixture_stats s where s.fixture_id = f.id and s.team_id = f.home_id) as home_sot,
+        (select s.shots_on_target from fixture_stats s where s.fixture_id = f.id and s.team_id = f.away_id) as away_sot
       from fixtures f
       where f.league_id = ${leagueId} and f.status in ('FT', 'AET', 'PEN')
         and f.kickoff > ${new Date(now.getTime() - 800 * 86400_000)}`;
     byLeague.set(leagueId, past.map((p) => ({
       date: p.kickoff, homeId: p.home_id, awayId: p.away_id, homeGoals: p.home_goals, awayGoals: p.away_goals,
+      homeShotsOnTarget: p.home_sot, awayShotsOnTarget: p.away_sot,
     })));
     for (const p of past) {
       for (const t of [p.home_id, p.away_id]) {

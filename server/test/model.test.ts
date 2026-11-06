@@ -119,3 +119,38 @@ test('Valor: apuesta con y sin valor; combinadas', () => {
   // README: 4 apuestas del 70 % = 24 %
   close(parlayProbability([0.7, 0.7, 0.7, 0.7]), 0.2401);
 });
+
+test('Modelo v2: equipos iguales son simétricos y el goleador sale favorito', async () => {
+  const { expectedGoalsV2 } = await import('../supabase/functions/_shared/model/index.ts');
+  const league = fakeLeague();
+  const strong = expectedGoalsV2(league, 1, 3, '2025-01-01');
+  assert.ok(strong.lambdaHome > 2 && strong.lambdaAway < 0.6, JSON.stringify(strong));
+  // 2 y 4 marcan lo mismo: sus goles esperados deben ser iguales en cada campo.
+  const a = expectedGoalsV2(league, 2, 4, '2025-01-01');
+  const b = expectedGoalsV2(league, 4, 2, '2025-01-01');
+  close(a.lambdaHome, b.lambdaHome, 0.01); // casi iguales: sus partidos caen en fechas algo distintas
+  close(a.lambdaAway, b.lambdaAway, 0.01);
+});
+
+test('Modelo v2: un recién ascendido empieza más flojo que un equipo medio', async () => {
+  const { expectedGoalsV2 } = await import('../supabase/functions/_shared/model/index.ts');
+  const league = fakeLeague(); // un año de partidos (enero-diciembre 2024 aprox.)
+  // Equipo 9 aparece hace 20 días con un empate 1-1.
+  league.push({ date: '2025-06-10', homeId: 9, awayId: 2, homeGoals: 1, awayGoals: 1 });
+  const neutral = expectedGoalsV2(league, 9, 2, '2025-07-01', { promotedStrength: 1 });
+  const promoted = expectedGoalsV2(league, 9, 2, '2025-07-01', { promotedStrength: 0.8 });
+  assert.ok(promoted.lambdaHome < neutral.lambdaHome);
+  assert.ok(promoted.lambdaAway > neutral.lambdaAway);
+});
+
+test('Modelo v2: los tiros a puerta cuentan si se les da peso', async () => {
+  const { expectedGoalsV2 } = await import('../supabase/functions/_shared/model/index.ts');
+  // El equipo 1 marca poco pero tira mucho a puerta.
+  const league = fakeLeague().map((m) => ({
+    ...m,
+    homeShotsOnTarget: m.homeId === 2 ? 9 : 4, awayShotsOnTarget: m.awayId === 2 ? 9 : 4,
+  }));
+  const onlyGoals = expectedGoalsV2(league, 2, 4, '2025-01-01', { goalsWeight: 1 });
+  const withShots = expectedGoalsV2(league, 2, 4, '2025-01-01', { goalsWeight: 0.5 });
+  assert.ok(withShots.lambdaHome > onlyGoals.lambdaHome);
+});

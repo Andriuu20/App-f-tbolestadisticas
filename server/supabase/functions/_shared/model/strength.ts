@@ -7,6 +7,9 @@ export interface PastMatch {
   awayId: number;
   homeGoals: number;
   awayGoals: number;
+  /** Tiros a puerta (opcional; el modelo v2 los usa si están). */
+  homeShotsOnTarget?: number | null;
+  awayShotsOnTarget?: number | null;
 }
 
 export interface StrengthOptions {
