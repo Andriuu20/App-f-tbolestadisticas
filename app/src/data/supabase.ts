@@ -57,6 +57,8 @@ export interface RecentStats {
   away: Omit<RecentStats, 'home' | 'away' | 'cornersAvg' | 'yellowsAvg'>;
 }
 
+export interface CountMarket { home: number; away: number; total: number; over: Record<string, number> }
+
 export interface Prediction {
   fixture_id: number;
   model: string;
@@ -75,6 +77,9 @@ export interface Prediction {
     homeOver: Record<string, number>;
     awayOver: Record<string, number>;
     topScores: { home: number; away: number; p: number }[];
+    /** Córners y amarillas esperados y probabilidad de "más de X" (null si no hay datos). */
+    corners?: CountMarket | null;
+    yellows?: CountMarket | null;
   };
   home_recent: RecentStats;
   away_recent: RecentStats;

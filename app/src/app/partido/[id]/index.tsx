@@ -212,24 +212,43 @@ function RecentRow({ label, a, b, home, away, decimal }: {
 
 function Averages({ p, card, kind }: { p: Prediction; card: MatchCard; kind: 'corners' | 'cards' }) {
   const field = kind === 'corners' ? 'cornersAvg' : 'yellowsAvg';
-  const total = kind === 'corners' ? card.corners_avg : card.cards_avg;
+  const model = kind === 'corners' ? p.markets.corners : p.markets.yellows;
+  const word = kind === 'corners' ? 'córners' : 'amarillas';
   return (
-    <Card>
-      <Label>{kind === 'corners' ? 'CÓRNERS' : 'TARJETAS AMARILLAS'} · ÚLTIMOS 10 PARTIDOS</Label>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        {[[card.home_name, p.home_recent[field]], [card.away_name, p.away_recent[field]], ['Media del partido', total]].map(([n, v]) => (
-          <View key={n as string} style={[s.tile, { alignItems: 'center' }]}>
-            <T mono style={{ fontSize: 18 }}>{dec(v as number | null)}</T>
-            <T numberOfLines={1} style={{ fontSize: 11, color: colors.textSecondary }}>{n as string}</T>
+    <>
+      {model ? (
+        <Card>
+          <Label>{kind === 'corners' ? 'CÓRNERS' : 'TARJETAS AMARILLAS'} ESPERADOS (MODELO)</Label>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {[[card.home_name, model.home], [card.away_name, model.away], ['Total', model.total]].map(([n, v]) => (
+              <View key={n as string} style={[s.tile, { alignItems: 'center' }]}>
+                <T mono style={{ fontSize: 18 }}>{dec(v as number)}</T>
+                <T numberOfLines={1} style={{ fontSize: 11, color: colors.textSecondary }}>{n as string}</T>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
-      <T style={{ fontSize: 12, color: colors.textSecondary }}>
-        Media de {kind === 'corners' ? 'córners' : 'amarillas'} sumando los dos equipos en los partidos de cada uno.
-        {kind === 'cards' && card.referee ? ` Árbitro: ${card.referee}.` : ''} Las probabilidades de
-        {kind === 'corners' ? ' córners' : ' tarjetas'} llegarán con la siguiente versión del modelo.
-      </T>
-    </Card>
+          {Object.entries(model.over).sort(([a], [b]) => Number(a) - Number(b)).map(([line, prob]) => (
+            <PctBar key={line} label={`Más de ${line.replace('.', ',')} ${word}`} p={prob} />
+          ))}
+        </Card>
+      ) : null}
+      <Card>
+        <Label>MEDIA EN LOS ÚLTIMOS 10 PARTIDOS</Label>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {[[card.home_name, p.home_recent[field]], [card.away_name, p.away_recent[field]]].map(([n, v]) => (
+            <View key={n as string} style={[s.tile, { alignItems: 'center' }]}>
+              <T mono style={{ fontSize: 18 }}>{dec(v as number | null)}</T>
+              <T numberOfLines={1} style={{ fontSize: 11, color: colors.textSecondary }}>{n as string}</T>
+            </View>
+          ))}
+        </View>
+        <T style={{ fontSize: 12, color: colors.textSecondary }}>
+          {word[0].toUpperCase() + word.slice(1)} de los dos equipos sumados en los partidos de cada uno.
+          {kind === 'cards' && card.referee ? ` Árbitro: ${card.referee}.` : ''}
+          {kind === 'cards' ? ' Solo amarillas; las rojas son raras y no se calculan.' : ''}
+        </T>
+      </Card>
+    </>
   );
 }
 
