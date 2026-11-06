@@ -4,6 +4,7 @@ import { scoreMatrix, type ScoreMatrixOptions } from './poisson.ts';
 import { expectedGoalsV2, type RatingsOptions } from './ratings.ts';
 import { expectedGoals, type PastMatch, type StrengthOptions } from './strength.ts';
 
+export * from './counts.ts';
 export * from './historical.ts';
 export * from './markets.ts';
 export * from './poisson.ts';

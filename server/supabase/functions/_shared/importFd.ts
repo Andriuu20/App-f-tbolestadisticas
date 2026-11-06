@@ -1,11 +1,16 @@
 // Importa football-data.co.uk a la base de datos y calcula las predicciones de los próximos partidos.
 import type { FdRow } from './footballData.ts';
 import { recommend, settle } from './recommend.ts';
-import { historicalRates, predictGoals, type PastMatch } from './model/index.ts';
+import {
+  CARD_LINES, CORNER_LINES, expectedCounts, historicalRates, overProbabilities, predictGoals,
+  type CountMatch, type PastMatch,
+} from './model/index.ts';
 import type { Sql } from './types.ts';
 
 export const MODEL_VERSION = 'goles-v2';
 /** Ajustes elegidos con el backtest (scripts/backtest.ts). */
+/** Córners y amarillas: ajustes elegidos con scripts/backtest-corners.ts (docs/backtest-corners.txt). */
+export const COUNT_OPTIONS = { halfLifeDays: 180, priorMatches: 10, dispersion: 40 };
 export const MODEL_OPTIONS = {
   version: 'v2' as const, halfLifeDays: 365, priorMatches: 5, promotedStrength: 0.8, goalsWeight: 0.5, rho: -0.1,
 };
@@ -118,17 +123,27 @@ export async function computePredictions(sql: Sql, now = new Date(), days = 8): 
   if (upcoming.length === 0) return 0;
 
   const byLeague = new Map<number, PastMatch[]>();
+  const cornersByLeague = new Map<number, CountMatch[]>();
+  const yellowsByLeague = new Map<number, CountMatch[]>();
   const statsByTeam = new Map<number, { kickoff: number; corners: number | null; yellows: number | null }[]>();
   for (const leagueId of new Set(upcoming.map((u) => u.league_id as number))) {
     const past = await sql`
       select f.id, f.kickoff, f.home_id, f.away_id, f.home_goals, f.away_goals,
         (select sum(s.corners) from fixture_stats s where s.fixture_id = f.id) as corners,
         (select sum(s.yellow_cards) from fixture_stats s where s.fixture_id = f.id) as yellows,
-        (select s.shots_on_target from fixture_stats s where s.fixture_id = f.id and s.team_id = f.home_id) as home_sot,
-        (select s.shots_on_target from fixture_stats s where s.fixture_id = f.id and s.team_id = f.away_id) as away_sot
+        hs.shots_on_target as home_sot, aws.shots_on_target as away_sot,
+        hs.corners as home_corners, aws.corners as away_corners,
+        hs.yellow_cards as home_yellows, aws.yellow_cards as away_yellows
       from fixtures f
+      left join fixture_stats hs on hs.fixture_id = f.id and hs.team_id = f.home_id
+      left join fixture_stats aws on aws.fixture_id = f.id and aws.team_id = f.away_id
       where f.league_id = ${leagueId} and f.status in ('FT', 'AET', 'PEN')
         and f.kickoff > ${new Date(now.getTime() - 800 * 86400_000)}`;
+    const toCounts = (h: string, a: string): CountMatch[] => past.map((p) => ({
+      date: p.kickoff, homeId: p.home_id, awayId: p.away_id, home: p[h], away: p[a],
+    }));
+    cornersByLeague.set(leagueId, toCounts('home_corners', 'away_corners'));
+    yellowsByLeague.set(leagueId, toCounts('home_yellows', 'away_yellows'));
     byLeague.set(leagueId, past.map((p) => ({
       date: p.kickoff, homeId: p.home_id, awayId: p.away_id, homeGoals: p.home_goals, awayGoals: p.away_goals,
       homeShotsOnTarget: p.home_sot, awayShotsOnTarget: p.away_sot,
@@ -167,6 +182,20 @@ export async function computePredictions(sql: Sql, now = new Date(), days = 8): 
       cornersAvg: avgOf(id, t, 'corners'), yellowsAvg: avgOf(id, t, 'yellows'),
     });
     const home = recent(u.home_id), away = recent(u.away_id);
+    // Córners y amarillas esperados y probabilidad de "más de X" (null si la liga no tiene esos datos).
+    const countMarket = (list: CountMatch[] | undefined, lines: number[]) => {
+      try {
+        const e = expectedCounts(list ?? [], u.home_id, u.away_id, u.kickoff, COUNT_OPTIONS);
+        return { home: e.home, away: e.away, total: e.total, over: overProbabilities(e.total, lines, COUNT_OPTIONS.dispersion) };
+      } catch {
+        return null;
+      }
+    };
+    const markets = {
+      ...p,
+      corners: countMarket(cornersByLeague.get(u.league_id), CORNER_LINES),
+      yellows: countMarket(yellowsByLeague.get(u.league_id), CARD_LINES),
+    };
     const r4 = (x: number) => Math.round(x * 10000) / 10000;
     await sql`
       insert into predictions (fixture_id, model, computed_at, lambda_home, lambda_away, p_home, p_draw, p_away,
@@ -174,7 +203,7 @@ export async function computePredictions(sql: Sql, now = new Date(), days = 8): 
       values (${u.id}, ${MODEL_VERSION}, now(), ${p.lambdaHome.toFixed(2)}, ${p.lambdaAway.toFixed(2)},
         ${r4(p.home)}, ${r4(p.draw)}, ${r4(p.away)}, ${r4(p.over[2.5])}, ${r4(p.btts)},
         ${both(home.cornersAvg, away.cornersAvg)}, ${both(home.yellowsAvg, away.yellowsAvg)},
-        ${JSON.stringify(p)}::text::jsonb, ${JSON.stringify(home)}::text::jsonb, ${JSON.stringify(away)}::text::jsonb)
+        ${JSON.stringify(markets)}::text::jsonb, ${JSON.stringify(home)}::text::jsonb, ${JSON.stringify(away)}::text::jsonb)
       on conflict (fixture_id) do update set
         model = excluded.model, computed_at = now(), lambda_home = excluded.lambda_home,
         lambda_away = excluded.lambda_away, p_home = excluded.p_home, p_draw = excluded.p_draw,

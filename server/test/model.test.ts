@@ -154,3 +154,25 @@ test('Modelo v2: los tiros a puerta cuentan si se les da peso', async () => {
   const withShots = expectedGoalsV2(league, 2, 4, '2025-01-01', { goalsWeight: 0.5 });
   assert.ok(withShots.lambdaHome > onlyGoals.lambdaHome);
 });
+
+test('Córners: binomial negativa con dispersión enorme = Poisson, y suma 1', async () => {
+  const { countCdf, overProbabilities } = await import('../supabase/functions/_shared/model/index.ts');
+  close(countCdf(9, 10.5, Infinity), countCdf(9, 10.5, 1e9), 1e-6);
+  close(countCdf(200, 10.5, 20), 1, 1e-9);
+  // Con más dispersión, los extremos son más probables.
+  const poisson = overProbabilities(10, [13.5], Infinity)[13.5];
+  const nb = overProbabilities(10, [13.5], 8)[13.5];
+  assert.ok(nb > poisson);
+  // Media 10: P(más de 9,5) cerca del 54 % con Poisson.
+  close(overProbabilities(10, [9.5], Infinity)[9.5], 1 - countCdf(9, 10), 1e-12);
+});
+
+test('Córners: el equipo que fuerza más córners tiene más esperados', async () => {
+  const { expectedCounts } = await import('../supabase/functions/_shared/model/index.ts');
+  const m = fakeLeague().map((x) => ({ date: x.date, homeId: x.homeId, awayId: x.awayId,
+    home: x.homeId === 1 ? 9 : 4, away: x.awayId === 1 ? 8 : 4 }));
+  const e = expectedCounts(m, 1, 3, '2025-01-01');
+  const f = expectedCounts(m, 2, 3, '2025-01-01');
+  assert.ok(e.home > f.home + 2, JSON.stringify({ e, f }));
+  close(e.total, e.home + e.away, 1e-9);
+});

@@ -1,0 +1,18 @@
+
+== A) CÓRNERS — football-data, prueba 2023-24 a 2026-27 (5707 partidos) ==
+  Ajustes: semivida 180 d, prior 10, dispersión 40
+  Pérdida logarítmica (líneas 8.5, 9.5, 10.5): modelo 0.6661 | solo media de la liga 0.6714 | Poisson 0.6670
+  Calibración más de 9,5 (modelo dice → pasó): 28→34 % (79)  36→40 % (932)  45→46 % (2200)  54→56 % (1877)  63→61 % (540)  73→74 % (74)
+
+== A) TARJETAS AMARILLAS — football-data, prueba 2023-24 a 2026-27 (5707 partidos) ==
+  Ajustes: semivida 180 d, prior 10, dispersión 40
+  Pérdida logarítmica (líneas 3.5, 4.5): modelo 0.6574 | solo media de la liga 0.6687 | Poisson 0.6578
+  Calibración más de 4,5 (modelo dice → pasó): 18→19 % (128)  26→28 % (1060)  35→35 % (2035)  44→42 % (1609)  54→51 % (691)  63→62 % (166)
+
+== B) CÓRNERS frente a la casa — FootyStats, Premier 2019-20 (1570 cuotas de 5 líneas) ==
+  Pérdida logarítmica: modelo 0.6217 | casa sin margen 0.6219
+  Mejor mezcla: 50 % modelo / 50 % casa (pérdida 0.6205) — ojo: elegida con los mismos partidos
+  Margen medio de la casa en córners: 7.2 %
+  Apostar cuando el modelo ve valor > 3 %: 566 apuestas, acierto 43.6 %, beneficio 5.0 %
+  Apostar cuando el modelo ve valor > 8 %: 329 apuestas, acierto 39.5 %, beneficio 3.9 %
+  Apostar cuando el modelo ve valor > 15 %: 126 apuestas, acierto 36.5 %, beneficio 7.1 %

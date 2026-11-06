@@ -63,8 +63,11 @@ test('importa sin duplicar y calcula predicciones de los próximos partidos', as
   assert.ok(Number(card.p_home) > Number(card.p_away), 'el Betis golea en casa: debería ser favorito');
   assert.equal(Number(card.odd_home), 1.6);
   assert.equal(Number(card.corners_avg), 10);
-  const [pred] = await sql`select home_recent from predictions`;
+  const [pred] = await sql`select home_recent, markets from predictions`;
   assert.equal(pred.home_recent.form.length, 5);
+  assert.ok(pred.markets.corners.total > 8 && pred.markets.corners.total < 12, JSON.stringify(pred.markets.corners));
+  assert.ok(pred.markets.corners.over['9.5'] > 0 && pred.markets.corners.over['9.5'] < 1);
+  assert.ok(pred.markets.yellows.total > 3 && pred.markets.yellows.total < 5);
 
   // Recomendaciones: con cuota local 1,60 hay "segura"; cuando se juega, se comprueba y ya no cambia.
   const recs = await updateRecommendations(db, new Date('2026-11-06T12:00:00Z'));
