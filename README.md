@@ -195,7 +195,7 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 ---
 
 ## 11. Primeros pasos
-1. Crear el proyecto Expo (TypeScript) y el repositorio en GitHub.
+1. Crear el entorno de Claude Code para este repositorio (sección 12) y el proyecto Expo (TypeScript). El repositorio de GitHub ya existe.
 2. Crear la cuenta gratis de API-Football y probar las consultas (partidos del día, estadísticas, córners, tarjetas, cuotas).
 3. Montar el servidor y la base de datos que descargan y guardan los datos (con caché).
 4. Calcular las probabilidades (porcentajes históricos + Poisson) para 1X2, goles y ambos marcan.
@@ -204,3 +204,14 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 7. Las 3 recomendaciones y el historial con resultados reales.
 8. Análisis de capturas con la API de Claude.
 9. Probarla en el iPhone con Expo Go durante unas semanas y revisar el % de acierto.
+
+---
+
+## 12. Entorno de trabajo en Claude Code (nube)
+
+- En la app de Claude, al abrir una sesión, dejar el entorno en **Auto** ("Follows your repositories"): usa el entorno guardado para este repositorio y, si no hay ninguno, el **Default**.
+- Al empezar a programar, crear un **entorno propio para este repositorio** que:
+  - Permita conectarse a la API de fútbol (API-Football: `v3.football.api-sports.io`; FootyStats: `api.football-data-api.com`, solo si se usa) y a la API de Claude (`api.anthropic.com`) para el análisis de capturas.
+  - Guarde las claves de las APIs como **secretos del entorno** (nunca pegarlas en el chat ni subirlas al repositorio). API-Football usa la cabecera `x-apisports-key`.
+  - Tenga un script de configuración que instale las dependencias del proyecto (por ejemplo `npm install`).
+- Con el entorno en Auto, este entorno se elegirá solo cada vez que se abra el repositorio.
