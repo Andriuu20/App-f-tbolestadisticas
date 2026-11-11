@@ -62,9 +62,14 @@ export async function importRows(sql: Sql, rows: FdRow[]): Promise<ImportReport>
       insert into fixtures ${sql(fx, 'external_key', 'source', 'league_id', 'season', 'kickoff', 'status',
         'home_id', 'away_id', 'home_goals', 'away_goals', 'home_goals_ht', 'away_goals_ht', 'referee')}
       on conflict (external_key) do update set
-        kickoff = excluded.kickoff, status = excluded.status,
-        home_goals = excluded.home_goals, away_goals = excluded.away_goals,
-        home_goals_ht = excluded.home_goals_ht, away_goals_ht = excluded.away_goals_ht,
+        -- Un partido ya jugado nunca vuelve a "por jugar": fixtures.csv a veces sigue listando
+        -- partidos ya jugados, sin resultado, y no deben borrar el resultado que ya tenemos.
+        kickoff = excluded.kickoff,
+        status = case when fixtures.status <> 'NS' and excluded.status = 'NS' then fixtures.status else excluded.status end,
+        home_goals = coalesce(excluded.home_goals, fixtures.home_goals),
+        away_goals = coalesce(excluded.away_goals, fixtures.away_goals),
+        home_goals_ht = coalesce(excluded.home_goals_ht, fixtures.home_goals_ht),
+        away_goals_ht = coalesce(excluded.away_goals_ht, fixtures.away_goals_ht),
         referee = coalesce(excluded.referee, fixtures.referee), updated_at = now()
       returning id, external_key`;
     report.fixtures += saved.length;
@@ -109,8 +114,8 @@ export async function importRows(sql: Sql, rows: FdRow[]): Promise<ImportReport>
       report.odds += odds.length;
     }
   }
-  // Partidos aplazados: el que no se jugó y ya pasó hace días se borra (vuelve con su nueva fecha).
-  await sql`delete from fixtures where source = 'football-data' and status = 'NS' and kickoff < now() - interval '3 days'`;
+  // Partidos aplazados: el que sigue sin resultado una semana después se borra (vuelve con su nueva fecha).
+  await sql`delete from fixtures where source = 'football-data' and status = 'NS' and kickoff < now() - interval '7 days'`;
   return report;
 }
 
@@ -263,4 +268,53 @@ export async function updateRecommendations(sql: Sql, now = new Date()): Promise
     settled++;
   }
   return { saved, settled };
+}
+
+/**
+ * Rehace las recomendaciones de partidos ya jugados en los últimos `days` días que no tienen ninguna
+ * (por ejemplo, si se perdieron). Solo usa información de antes del partido: las cuotas previas y
+ * los partidos anteriores para el modelo. Después se comprueban como las demás.
+ */
+export async function backfillRecommendations(sql: Sql, days = 10, now = new Date()): Promise<number> {
+  const missing = await sql`
+    select f.id, f.league_id, f.kickoff, f.home_id, f.away_id, h.name as home_name, a.name as away_name
+    from fixtures f join teams h on h.id = f.home_id join teams a on a.id = f.away_id
+    where f.status in ('FT', 'AET', 'PEN') and f.kickoff between ${new Date(now.getTime() - days * 86400_000)} and ${now}
+      and exists (select 1 from odds o where o.fixture_id = f.id and o.bookmaker = 'Bet365')
+      and not exists (select 1 from recommendations r where r.fixture_id = f.id)`;
+  let saved = 0;
+  for (const u of missing) {
+    const past = (await sql`
+      select f.kickoff, f.home_id, f.away_id, f.home_goals, f.away_goals,
+        hs.shots_on_target as home_sot, aws.shots_on_target as away_sot
+      from fixtures f
+      left join fixture_stats hs on hs.fixture_id = f.id and hs.team_id = f.home_id
+      left join fixture_stats aws on aws.fixture_id = f.id and aws.team_id = f.away_id
+      where f.league_id = ${u.league_id} and f.status in ('FT', 'AET', 'PEN') and f.kickoff < ${u.kickoff}
+        and f.kickoff > ${new Date(new Date(u.kickoff).getTime() - 800 * 86400_000)}`).map((p) => ({
+      date: p.kickoff, homeId: p.home_id, awayId: p.away_id, homeGoals: p.home_goals, awayGoals: p.away_goals,
+      homeShotsOnTarget: p.home_sot, awayShotsOnTarget: p.away_sot,
+    })) as PastMatch[];
+    let p;
+    try { p = predictGoals(past, u.home_id, u.away_id, u.kickoff, MODEL_OPTIONS); } catch { continue; }
+    const odds = (await sql`select bookmaker, market, selection, odd from odds where fixture_id = ${u.id}`)
+      .map((o) => ({ ...o, odd: Number(o.odd) })) as { bookmaker: string; market: string; selection: string; odd: number }[];
+    const recs = recommend(odds, {
+      homeName: u.home_name, awayName: u.away_name,
+      model: { home: p.home, draw: p.draw, away: p.away, over25: p.over[2.5] },
+      homeRecent: { ...historicalRates(past, u.home_id, u.kickoff, { last: 10 }),
+        home: historicalRates(past, u.home_id, u.kickoff, { last: 10, venue: 'home' }) },
+      awayRecent: { ...historicalRates(past, u.away_id, u.kickoff, { last: 10 }),
+        away: historicalRates(past, u.away_id, u.kickoff, { last: 10, venue: 'away' }) },
+    });
+    for (const r of recs) {
+      await sql`
+        insert into recommendations (fixture_id, tier, market, selection, label, odd, prob, model_prob, reason, model, updated_at)
+        values (${u.id}, ${r.tier}, ${r.market}, ${r.selection}, ${r.label}, ${r.odd}, ${r.prob.toFixed(4)},
+          ${r.modelProb.toFixed(4)}, ${r.reason}, ${MODEL_VERSION}, now())
+        on conflict (fixture_id, tier) do nothing`;
+      saved++;
+    }
+  }
+  return saved;
 }

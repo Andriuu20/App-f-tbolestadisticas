@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 import postgres from 'postgres';
 import { londonToUtc, parseFootballData } from '../supabase/functions/_shared/footballData.ts';
-import { computePredictions, importRows, updateRecommendations } from '../supabase/functions/_shared/importFd.ts';
+import { backfillRecommendations, computePredictions, importRows, updateRecommendations } from '../supabase/functions/_shared/importFd.ts';
 import type { Sql } from '../supabase/functions/_shared/types.ts';
 
 const sql = postgres(process.env.TEST_DATABASE_URL!, { max: 1, onnotice: () => {} });
@@ -81,5 +81,34 @@ test('importa sin duplicar y calcula predicciones de los próximos partidos', as
   const [done] = await sql`select won, odd from recommendations where tier = 'segura'`;
   assert.equal(done.won, true);
   assert.equal(Number(done.odd), 1.6);
+});
+
+test('un partido jugado no vuelve a "por jugar" si fixtures.csv aún lo lista sin resultado', async () => {
+  const played = 'SP1,06/11/2026,20:00,Sevilla,Alaves,0,0,D,0,0,D,,10,8,4,3,6,4,2,2,0,0,1.85,3.5,4.5,2.2,1.67';
+  const stale = 'SP1,06/11/2026,20:00,Sevilla,Alaves,,,,,,,,,,,,,,,,,,1.85,3.5,4.5,2.2,1.67';
+  await importRows(db, parseFootballData(csv(played)));
+  await importRows(db, parseFootballData(csv(stale))); // como el fixtures.csv atrasado
+  const [f] = await sql`select status, home_goals, away_goals from fixtures`;
+  assert.deepEqual({ ...f }, { status: 'FT', home_goals: 0, away_goals: 0 });
+});
+
+test('rehace recomendaciones perdidas de partidos jugados con datos de antes del partido', async () => {
+  const rows: string[] = [];
+  const teams = ['Sevilla', 'Alaves', 'Betis', 'Getafe'];
+  let day = 1;
+  for (const h of teams) for (const a of teams) {
+    if (h === a) continue;
+    rows.push(`SP1,${String(day++).padStart(2, '0')}/10/2026,20:00,${h},${a},2,1,H,1,0,H,,10,8,4,3,6,4,2,2,0,0,2,3.3,3.5,2,1.8`);
+  }
+  rows.push('SP1,06/11/2026,20:00,Betis,Getafe,1,0,H,0,0,D,,10,8,4,3,6,4,2,2,0,0,1.5,4.2,6.5,1.85,1.95');
+  await importRows(db, parseFootballData(csv(...rows)));
+  const n = await backfillRecommendations(db, 10, new Date('2026-11-11T12:00:00Z'));
+  assert.ok(n >= 2, `rehízo ${n}`);
+  await updateRecommendations(db, new Date('2026-11-11T12:00:00Z'));
+  const [segura] = await sql`select label, won from recommendations r join fixtures f on f.id = r.fixture_id
+    where f.kickoff = '2026-11-06T20:00:00Z' and tier = 'segura'`;
+  assert.deepEqual({ ...segura }, { label: 'Gana Betis', won: true });
+  // Si se vuelve a ejecutar no duplica nada.
+  assert.equal(await backfillRecommendations(db, 10, new Date('2026-11-11T12:00:00Z')), 0);
 });
 
