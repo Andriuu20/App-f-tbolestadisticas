@@ -172,3 +172,21 @@ export async function getUpcomingRecommendations(tier: Tier): Promise<Recommenda
 export async function getSettledRecommendations(): Promise<Recommendation[]> {
   return (await get<Recommendation[]>(`recommendation_cards?select=*&won=not.is.null&order=kickoff.desc&limit=500`)).map(normRec);
 }
+
+/** Partidos jugados de una liga desde una fecha, con córners y amarillas de cada equipo. */
+export async function getPlayedMatches(leagueId: number, fromIso: string) {
+  const cards = await get<MatchCard[]>(
+    `match_cards?select=id,home_id,home_name,away_id,away_name,home_goals,away_goals&league_id=eq.${leagueId}` +
+      `&status=eq.FT&kickoff=gte.${encodeURIComponent(fromIso)}&order=kickoff`,
+  );
+  const stats = cards.length ? await get<{ fixture_id: number; team_id: number; corners: number | null; yellow_cards: number | null }[]>(
+    `fixture_stats?select=fixture_id,team_id,corners,yellow_cards&fixture_id=in.(${cards.map((c) => c.id).join(',')})`,
+  ) : [];
+  const st = (f: number, t: number) => stats.find((s) => s.fixture_id === f && s.team_id === t);
+  return cards.map((c) => ({
+    homeId: c.home_id, homeName: c.home_name, awayId: c.away_id, awayName: c.away_name,
+    homeGoals: Number(c.home_goals), awayGoals: Number(c.away_goals),
+    homeCorners: st(c.id, c.home_id)?.corners ?? null, awayCorners: st(c.id, c.away_id)?.corners ?? null,
+    homeYellows: st(c.id, c.home_id)?.yellow_cards ?? null, awayYellows: st(c.id, c.away_id)?.yellow_cards ?? null,
+  }));
+}

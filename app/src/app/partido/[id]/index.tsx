@@ -6,6 +6,7 @@ import { ErrorBox, Loading, Screen } from '../../../components/Screen';
 import { Card, Chips, Form, Label, ModelWarning, OverUnder, PctBar, s, T } from '../../../components/ui';
 import { getHeadToHead, getMatch, getStats, type MatchCard, type Odd, type Prediction } from '../../../data/supabase';
 import { dec, initials, pct, time } from '../../../logic/format';
+import { bothTeamsCarded, teamOver } from '../../../logic/probabilities';
 import { expectedValue, fairProbabilities, leagueShort } from '../../../logic/value';
 import { colors, fonts } from '../../../theme/colors';
 
@@ -217,7 +218,7 @@ function Averages({ p, card, kind }: { p: Prediction; card: MatchCard; kind: 'co
     <>
       {model ? (
         <Card>
-          <Label>{kind === 'corners' ? 'CÓRNERS' : 'TARJETAS AMARILLAS'} ESPERADOS (MODELO)</Label>
+          <Label>{kind === 'corners' ? 'CÓRNERS ESPERADOS' : 'AMARILLAS ESPERADAS'} (MODELO)</Label>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {[[card.home_name, model.home], [card.away_name, model.away], ['Total', model.total]].map(([n, v]) => (
               <View key={n as string} style={[s.tile, { alignItems: 'center' }]}>
@@ -227,6 +228,17 @@ function Averages({ p, card, kind }: { p: Prediction; card: MatchCard; kind: 'co
             ))}
           </View>
           <OverUnder title="PROBABILIDAD" unit={word} over={model.over} />
+        </Card>
+      ) : null}
+      {model ? (
+        <Card style={{ gap: 18 }}>
+          <OverUnder title={card.home_name.toUpperCase()} unit={word}
+            over={teamOver(model.home, kind === 'corners' ? 'corners' : 'yellows')} />
+          <OverUnder title={card.away_name.toUpperCase()} unit={word}
+            over={teamOver(model.away, kind === 'corners' ? 'corners' : 'yellows')} />
+          {kind === 'cards' && (
+            <PctBar label="Los dos equipos reciben al menos 1 amarilla" p={bothTeamsCarded(model.home, model.away)} />
+          )}
         </Card>
       ) : null}
       <Card>

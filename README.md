@@ -213,6 +213,7 @@ Barra inferior: Partidos · Rankings · Para ti · Historial.
 5. Pantallas 1 y 2 (Partidos de hoy y Ficha del partido) con datos reales.
    - ✅ Hechas con datos reales de football-data.co.uk (5 ligas, próximos partidos con cuotas de Bet365) a través de Supabase; el servidor recalcula las predicciones cada 6 horas. Aviso visible de «modelo en pruebas».
 6. Pantalla de rankings.
+   - ✅ Hecha: equipos de cada liga ordenados por más de 2,5, ambos marcan, goles, córners y tarjetas (temporada actual). Además, probabilidades por equipo de córners y amarillas, comprobadas en `docs/backtest-por-equipo.txt`.
 7. Las 3 recomendaciones y el historial con resultados reales.
    - ✅ Hechas: el servidor elige 1 apuesta por nivel con cuotas de Bet365 (probabilidad de la casa sin margen; el modelo como segunda opinión), las guarda antes del partido y las comprueba al terminar. Pantallas «Apuestas recomendadas», «Para ti» e «Historial». En 12.901 partidos pasados: segura 66 % de acierto y −3 % de beneficio (`docs/backtest-recomendaciones.txt`).
 8. Análisis de capturas con la API de Claude.

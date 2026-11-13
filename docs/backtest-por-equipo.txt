@@ -1,0 +1,15 @@
+
+== CÓRNERS DE CADA EQUIPO (11414 equipos-partido) ==
+  Mejor dispersión: 10
+  Más de 3,5 (dice → pasó): 37→32 %  46→47 %  55→55 %  65→65 %  75→76 %  84→85 %
+  Más de 4,5 (dice → pasó): 18→22 %  26→24 %  35→35 %  45→44 %  55→57 %  64→64 %  74→75 %
+  Más de 5,5 (dice → pasó): 16→15 %  25→26 %  35→36 %  45→45 %  54→56 %  64→65 %
+
+== AMARILLAS DE CADA EQUIPO (11414 equipos-partido) ==
+  Mejor dispersión: Infinity
+  Más de 0,5 (dice → pasó): 77→77 %  86→87 %  92→93 %
+  Más de 1,5 (dice → pasó): 37→39 %  46→46 %  55→58 %  65→67 %  74→72 %  82→77 %
+  Más de 2,5 (dice → pasó): 17→18 %  26→26 %  35→34 %  44→42 %  54→50 %  63→57 %
+
+== LOS DOS EQUIPOS RECIBEN AMARILLA (5707 partidos) ==
+  (dice → pasó): 58→65 %  66→70 %  75→79 %  83→85 %
