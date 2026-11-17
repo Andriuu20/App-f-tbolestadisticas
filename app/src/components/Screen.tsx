@@ -1,12 +1,15 @@
 // Contenedor común de pantalla: fondo oscuro y márgenes de la zona segura.
 import type { ReactNode } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme/colors';
 import { T } from './ui';
 
 export const Screen = ({ children }: { children: ReactNode }) => (
-  <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>{children}</SafeAreaView>
+  // En la web, el hueco de la barra de estado del iPhone lo deja public/index.html (padding-top).
+  <SafeAreaView edges={Platform.OS === 'web' ? [] : ['top']} style={{ flex: 1, backgroundColor: colors.background }}>
+    {children}
+  </SafeAreaView>
 );
 
 export const Loading = () => (

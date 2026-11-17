@@ -28,6 +28,10 @@
         display: flex;
         height: 100%;
         flex: 1;
+        /* Deja libre la zona de la hora y la batería del iPhone al abrirla desde el icono
+           (si el iPhone ya la deja libre, esto vale 0 y no cambia nada). */
+        padding-top: env(safe-area-inset-top);
+        box-sizing: border-box;
       }
     </style>
   </head>
